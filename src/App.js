@@ -11,14 +11,11 @@ class App extends Component {
     super(props);
 
     this.app = firebase.initializeApp(DB_CONFIG);
+    this.database = this.app.database().ref().child('cards');
     this.updateCard = this.updateCard.bind(this);
 
     this.state = {
-      cards: [
-        {id: 1, eng: "English", han: "Hanzi", pin: "Pinyin"},
-        {id: 2, eng: "English_2", han: "Hanzi_2", pin: "Pinyin_2"},
-        {id: 3, eng: "English_3", han: "Hanzi_3", pin: "Pinyin_3"}
-      ],
+      cards: [],
       currentCard: {}
     }
   }
@@ -26,9 +23,18 @@ class App extends Component {
   //This lifecycle method gets called after constructor and before component is rendered
   componentWillMount(){
     const currentCards = this.state.cards;
+
+    this.database.on('child_added', snap => {
+      currentCards.push({
+        id:  snap.key,
+        eng: snap.val().eng,
+        han: snap.val().han,
+        pin: snap.val().pin
+      })
     this.setState({
       cards: currentCards,
       currentCard: this.getRandomCard(currentCards)
+      })
     })
   }
 
